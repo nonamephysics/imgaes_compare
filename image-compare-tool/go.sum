@@ -1,0 +1,8 @@
+module image-compare-tool
+
+go 1.18
+
+require (
+    github.com/disintegration/imaging v1.6.2
+    github.com/nfnt/resize v0.0.0-20170124000000-7f5c3c3c3c3c
+)
