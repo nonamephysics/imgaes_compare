@@ -1,13 +1,14 @@
 package comparer
 
 import (
+	"errors"
 	"image"
 	"image/color"
-	"image/png"
 	"image/jpeg"
+	"image/png"
 	"os"
 	"path/filepath"
-	"math"
+	"strconv"
 )
 
 func CompareImages(basePath string, comparePath string, tolerance float64) (string, error) {
@@ -15,7 +16,6 @@ func CompareImages(basePath string, comparePath string, tolerance float64) (stri
 	if err != nil {
 		return "", err
 	}
-	
 
 	compareImg, err := loadImage(comparePath)
 	if err != nil {
@@ -80,7 +80,8 @@ func loadImage(path string) (image.Image, error) {
 	}
 
 	return img, err
-}// highlightDifferences creates an image highlighting the differences between two images and saves it to the specified path.
+}
+
 func highlightDifferences(baseImg, compareImg image.Image, outputPath string) error {
 	bounds := baseImg.Bounds()
 	diffImg := image.NewRGBA(bounds)
@@ -108,5 +109,3 @@ func highlightDifferences(baseImg, compareImg image.Image, outputPath string) er
 
 	return png.Encode(outputFile, diffImg)
 }
-
-func loadImage(path string) (image.Image, error) {
