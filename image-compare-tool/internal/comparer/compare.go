@@ -2,10 +2,12 @@ package comparer
 
 import (
 	"errors"
+	"fmt"
 	"image"
 	"image/color"
 	"image/jpeg"
 	"image/png"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -64,9 +66,10 @@ func formatFloat(f float64) string {
 }
 
 func loadImage(path string) (image.Image, error) {
+	log.Printf("Attempting to load image: %s", path)
 	file, err := os.Open(path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open file: %w", err)
 	}
 	defer file.Close()
 
@@ -79,7 +82,10 @@ func loadImage(path string) (image.Image, error) {
 		return nil, errors.New("unsupported image format")
 	}
 
-	return img, err
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode image: %w", err)
+	}
+	return img, nil
 }
 
 func highlightDifferences(baseImg, compareImg image.Image, outputPath string) error {
