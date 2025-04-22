@@ -23,17 +23,21 @@ jobs:
         go-version: '1.21'
 
     - name: Build
+      mkdir -p build
       run: go build -o build/image-compare-tool ./cmd
 
     - name: Test
       run: go test -v ./...
 
     - name: Archive build folder
-      run: tar -czvf image-compare.tar.gz -C build .
+      run: |
+        mkdir -p build
+        ls -al build
+        tar -czvf image-compare.tar.gz -C build .
 
     - name: Upload build artifacts
       if: success()
       uses: actions/upload-artifact@v3
       with:
         name: build-artifacts
-        path: image-compare.tar.gz
+        path: ./image-compare.tar.gz
