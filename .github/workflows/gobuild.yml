@@ -31,13 +31,16 @@ jobs:
         run: go mod tidy
 
       - name: Build the project
-        run: go build -v ./...
+        run: |
+          mkdir -p build
+          go build -v -o build/ ./...
 
       - name: Run tests
         run: go test -v ./...
 
       - name: Upload build artifacts
+        if: success()
         uses: actions/upload-artifact@v2
         with:
           name: build
-          path: ./build
+          path: build/
