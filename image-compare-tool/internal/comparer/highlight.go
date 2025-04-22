@@ -1,12 +1,11 @@
 package comparer
 
 import (
+	"errors"
 	"image"
 	"image/color"
-	"image/draw"
 	"image/png"
 	"os"
-	"errors"
 )
 
 var ErrImageSizeMismatch = errors.New("image sizes do not match")

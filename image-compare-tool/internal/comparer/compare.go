@@ -1,13 +1,22 @@
 package comparer
 
 import (
+	"context"
+	"errors"
+	"fmt"
 	"image"
 	"image/color"
-	"image/png"
 	"image/jpeg"
+	"image/png"
+	"io/ioutil"
+
+	"log"
 	"os"
 	"path/filepath"
-	"math"
+	"strconv"
+	"time"
+
+	"github.com/chromedp/chromedp"
 )
 
 func CompareImages(basePath string, comparePath string, tolerance float64) (string, error) {
@@ -15,7 +24,6 @@ func CompareImages(basePath string, comparePath string, tolerance float64) (stri
 	if err != nil {
 		return "", err
 	}
-	
 
 	compareImg, err := loadImage(comparePath)
 	if err != nil {
@@ -64,9 +72,20 @@ func formatFloat(f float64) string {
 }
 
 func loadImage(path string) (image.Image, error) {
+	log.Printf("Loading image: %s", path)
+
+	// Check if the file is an SVG and convert it to PNG
+	if filepath.Ext(path) == ".svg" {
+		var err error
+		path, err = convertSVGToPNG(path)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert SVG to PNG: %w", err)
+		}
+	}
+
 	file, err := os.Open(path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open file: %w", err)
 	}
 	defer file.Close()
 
@@ -79,8 +98,12 @@ func loadImage(path string) (image.Image, error) {
 		return nil, errors.New("unsupported image format")
 	}
 
-	return img, err
-}// highlightDifferences creates an image highlighting the differences between two images and saves it to the specified path.
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode image: %w", err)
+	}
+	return img, nil
+}
+
 func highlightDifferences(baseImg, compareImg image.Image, outputPath string) error {
 	bounds := baseImg.Bounds()
 	diffImg := image.NewRGBA(bounds)
@@ -109,4 +132,35 @@ func highlightDifferences(baseImg, compareImg image.Image, outputPath string) er
 	return png.Encode(outputFile, diffImg)
 }
 
-func loadImage(path string) (image.Image, error) {
+func convertSVGToPNG(svgPath string) (string, error) {
+	log.Printf("Converting SVG to PNG using headless browser: %s", svgPath)
+
+	// Define the output PNG path
+	pngPath := svgPath[:len(svgPath)-len(filepath.Ext(svgPath))] + ".png"
+
+	// Use chromedp to render the SVG and capture it as a PNG
+	ctx, cancel := chromedp.NewContext(context.Background())
+	defer cancel()
+
+	// Set a timeout for the operation
+	ctx, cancel = context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	var buf []byte
+	err := chromedp.Run(ctx,
+		chromedp.Navigate("file://"+svgPath),
+		chromedp.FullScreenshot(&buf, 100),
+	)
+	if err != nil {
+		return "", fmt.Errorf("failed to render SVG with headless browser: %w", err)
+	}
+
+	// Write the PNG data to the output file
+	err = ioutil.WriteFile(pngPath, buf, 0644)
+	if err != nil {
+		return "", fmt.Errorf("failed to write PNG file: %w", err)
+	}
+
+	log.Printf("SVG successfully converted to PNG: %s", pngPath)
+	return pngPath, nil
+}
