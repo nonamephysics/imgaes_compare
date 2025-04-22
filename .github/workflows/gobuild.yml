@@ -18,10 +18,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: ./.github/actions/checkout # Reference local version of checkout action
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: ./.github/actions/setup-go # Reference local version of setup-go action
         with:
           go-version: '1.20'
 
