@@ -1,4 +1,4 @@
-name: Go
+name: Build for Linux and Windows
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-linux:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -28,11 +28,40 @@ jobs:
 
     - name: Archive build folder
       run: |
-        tar -czvf image-compare.tar.gz -C build .
+        tar -czvf image-compare-linux.tar.gz -C build .
 
     - name: Upload build artifacts
       if: success()
-      uses:  actions/upload-artifact@v4
+      uses: actions/upload-artifact@v4
       with:
-        name: build-artifacts
-        path: ./image-compare.tar.gz
+        name: linux-build-artifacts
+        path: ./image-compare-linux.tar.gz
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+
+    - name: Build
+      run: |
+        mkdir -p build
+        go build -o build/image-compare-tool.exe ./cmd
+
+    - name: Test
+      run: go test -v ./...
+
+    - name: Archive build folder
+      run: |
+        Compress-Archive -Path build\* -DestinationPath image-compare-windows.zip
+
+    - name: Upload build artifacts
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-build-artifacts
+        path: ./image-compare-windows.zip
