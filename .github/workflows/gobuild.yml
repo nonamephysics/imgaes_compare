@@ -32,7 +32,11 @@ jobs:
       - name: Build the project
         run: |
           mkdir -p build
-          go build -o build/image-compare-tool ./cmd
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            go build -o build/image-compare-tool.exe ./cmd
+          else
+            go build -o build/image-compare-tool ./cmd
+          fi
 
       - name: Verify build directory
         run: |
