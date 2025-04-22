@@ -1,3 +1,3 @@
 module github.com/nonamephysics/image_compare
 
-go 1.24.1
+go 1.23
