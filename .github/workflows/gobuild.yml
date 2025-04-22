@@ -32,7 +32,7 @@ jobs:
       - name: Build the project
         run: |
           mkdir -p build
-          go build -v -o build/ ./...
+          go build -o build/image-compare-tool ./cmd
 
       - name: Verify build directory
         run: |
