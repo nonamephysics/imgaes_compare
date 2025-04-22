@@ -28,9 +28,12 @@ jobs:
     - name: Test
       run: go test -v ./...
 
+    - name: Archive build folder
+      run: tar -czvf image-compare.tar.gz -C build .
+
     - name: Upload build artifacts
       if: success()
-      uses: actions/upload-artifact@v3.1.0
+      uses: actions/upload-artifact@v3
       with:
         name: build-artifacts
-        path: build/
+        path: image-compare.tar.gz
