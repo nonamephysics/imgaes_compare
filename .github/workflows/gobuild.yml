@@ -1,7 +1,4 @@
-# This workflow will build a golang project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
-
-name: Go Build and Test
+name: Build EXE
 
 on:
   push:
@@ -12,45 +9,30 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.21'
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
 
-      - name: Install dependencies
-        run: go mod tidy
+    - name: Build
+      run: |
+        mkdir -p build
+        go build -o build/image-compare-tool.exe ./cmd
 
-      - name: Build the project
-        run: |
-          mkdir -p build
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            go build -o build/image-compare-tool.exe ./cmd
-          else
-            go build -o build/image-compare-tool ./cmd
-          fi
+    - name: Test
+      run: go test -v ./...
 
-      - name: Verify build directory
-        run: |
-          if [ ! -d "build" ]; then
-            echo "Build directory not found!"
-            exit 1
-          fi
+    - name: Archive build folder
+      run: |
+        tar -czvf image-compare.tar.gz -C build .
 
-      - name: Run tests
-        run: go test -v ./...
-
-      - name: Upload build artifacts
-        if: success()
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-artifacts
-          path: build/
+    - name: Upload build artifacts
+      if: success()
+      uses:  actions/upload-artifact@v4
+      with:
+        name: build-artifacts
+        path: ./image-compare.tar.gz
