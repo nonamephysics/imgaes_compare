@@ -36,8 +36,8 @@ jobs:
       - name: Run tests
         run: go test -v ./...
 
-      - name: Upload build artefacts
-        uses: actions/upload-artifact@v3
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v2
         with:
           name: build
           path: ./build
