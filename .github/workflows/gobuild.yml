@@ -35,6 +35,13 @@ jobs:
           mkdir -p build
           go build -v -o build/ ./...
 
+      - name: Verify build directory
+        run: |
+          if [ ! -d "build" ]; then
+            echo "Build directory not found!"
+            exit 1
+          fi
+
       - name: Run tests
         run: go test -v ./...
 
