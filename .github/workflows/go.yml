@@ -5,7 +5,7 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
-
+  workflow_dispatch:
 
 jobs:
   build:
@@ -26,13 +26,13 @@ jobs:
     - name: Test
       run: go test -v ./...
 
-    # - name: Archive build folder
-    #   run: |
-    #     tar -czvf image-compare.tar.gz -C build .
+    - name: Archive build folder
+      run: |
+        tar -czvf image-compare.tar.gz -C build .
 
-    # - name: Upload build artifacts
-    #   if: success()
-    #   uses: actions/upload-artifact@v3
-    #   with:
-    #     name: build-artifacts
-    #     path: ./image-compare.tar.gz
+    - name: Upload build artifacts
+      if: success()
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-artifacts
+        path: ./image-compare.tar.gz
